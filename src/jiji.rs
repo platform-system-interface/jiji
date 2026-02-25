@@ -103,6 +103,31 @@ impl std::str::FromStr for Point {
     }
 }
 
+impl Display for Point {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{},{}", self.x, self.y)
+    }
+}
+
+impl Point {
+    pub fn add(&mut self, v: Vector) {
+        self.x = (self.x as i32 + v.x) as u32;
+        self.y = (self.y as i32 + v.y) as u32;
+    }
+}
+
+/// Parse exactly one Point.
+pub(crate) fn point(input: &mut &[u8]) -> ModalResult<Point> {
+    let mut num = dec_uint::<_, u32, ErrMode<ContextError>>;
+    seq!(Point {
+        _: space0,
+        x: num,
+        _: space1,
+        y: num
+    })
+    .parse_next(input)
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Vector {
     pub(crate) x: i32,
@@ -117,16 +142,10 @@ impl std::str::FromStr for Vector {
     }
 }
 
-/// Parse exactly one Point.
-pub(crate) fn point(input: &mut &[u8]) -> ModalResult<Point> {
-    let mut num = dec_uint::<_, u32, ErrMode<ContextError>>;
-    seq!(Point {
-        _: space0,
-        x: num,
-        _: space1,
-        y: num
-    })
-    .parse_next(input)
+impl Display for Vector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{},{}", self.x, self.y)
+    }
 }
 
 /// Parse exactly one Vector.
