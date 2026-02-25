@@ -20,6 +20,8 @@
 //! - SPRI(te), scaling dimensions + base64 encoded bitmap/PNG/JPEG/webp image
 //! - DONE, end of sequence
 
+use std::fmt::Display;
+
 use winnow::combinator::opt;
 use winnow::prelude::*;
 use winnow::{
@@ -29,7 +31,7 @@ use winnow::{
     error::{ContextError, ErrMode},
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Color {
     pub(crate) r: u8,
     pub(crate) g: u8,
@@ -41,6 +43,12 @@ impl std::str::FromStr for Color {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         color.parse(s.as_bytes()).map_err(|e| e.to_string())
+    }
+}
+
+impl Display for Color {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#{:02x}{:02x}{:02x}", self.r, self.g, self.b)
     }
 }
 
@@ -58,7 +66,30 @@ pub(crate) fn color(input: &mut &[u8]) -> ModalResult<Color> {
     .parse_next(input)
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub(crate) struct Size {
+    pub(crate) s: u32,
+}
+
+impl std::str::FromStr for Size {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        size.parse(s.as_bytes()).map_err(|e| e.to_string())
+    }
+}
+
+/// Parse a Size, which is exactly one number.
+pub(crate) fn size(input: &mut &[u8]) -> ModalResult<Size> {
+    let mut num = dec_uint::<_, u32, ErrMode<ContextError>>;
+    seq!(Size {
+        _: space0,
+        s: num
+    })
+    .parse_next(input)
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Point {
     pub(crate) x: u32,
     pub(crate) y: u32,
@@ -72,7 +103,7 @@ impl std::str::FromStr for Point {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct Vector {
     pub(crate) x: i32,
     pub(crate) y: i32,
